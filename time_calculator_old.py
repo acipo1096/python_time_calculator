@@ -1,5 +1,10 @@
+# Technically, this passes the tests and I can submit this code to claim certification
+# However, I'm not 100% sure what constitutes good code, and I KNOW this is NOT good code
+# See what I can do to simplify logic and clean this up
+
 import re
 import math
+
 
 def add_time(start, duration, day="None"):
 
@@ -17,7 +22,7 @@ def add_time(start, duration, day="None"):
   next_day = ""
   formatted_minutes = ""
   days_elapsed = ''
-  get_number_of_days = 0
+  get_number_of_days = ''
   day_key = ''
   new_time = ''
 
@@ -30,10 +35,12 @@ def add_time(start, duration, day="None"):
   regex = re.compile('[0-9:]+')
   filtered_string = regex.search(start)
   start_list = filtered_string.group(0).split(":")
+  print("Start list: ", start_list)
 
   # STEP 3: Separate hours and minutes for your duration count
   filtered_string = regex.search(duration)
   duration_list = filtered_string.group(0).split(":")
+  print("Duration list: ", duration_list)
 
   #STEP 4: Define the starting hour; get the combined minutes
   start_hour = int(start_list[0])
@@ -47,32 +54,33 @@ def add_time(start, duration, day="None"):
 
   day2 = day.lower()
   day3 = day2.capitalize()
-
   # For loop to match day with dict day
   for i in range(1, len(days_of_week) + 1, 1):
     if (days_of_week[i] == day3):
       day_key = i
 
+  # THIS CODE REPEATS - DRY!!!
   if (day != "None"):
-    if ((hour / 24) > 1):
-      get_number_of_days = round(hour / 24)
-    else:
-      get_number_of_days = math.floor(hour / 24)
-
+    get_number_of_days = math.floor(hour / 24)
+    print(get_number_of_days)
     next_day = int(get_number_of_days) + day_key
-
-    # Checks if it's still the same day
+    print(next_day)
+    print("Next day is ", next_day)
     if (next_day == day_key):
-      next_day = days_of_week[day_key]
-    # Checks for how many days to increment
+      next_day = day_key
+      print(type(days_of_week[next_day]), "YO")
     elif (next_day <= 7):
       next_day = days_of_week[next_day]
-    # Checks for Saturday to Sunday, increments day to Sunday
+      print(next_day)
+    # Checks for Saturday to Sunday, next day test
     elif (next_day == 8 and get_number_of_days == 1):
       next_day = days_of_week[1]
-    # If goes into next week; resets the counter so it returns a day of the week
+    # Returns same day
     else:
-      next_day = days_of_week[(next_day - get_number_of_days) - 1]
+      print("Index of next day is", next_day)
+      next_day = days_of_week[next_day - get_number_of_days]
+      print(next_day, "wack")
+
 
   # STEP 6: Format minutes correctly and ensure they reset to zero on the hour
   if (minutes < 10):
@@ -96,8 +104,8 @@ def add_time(start, duration, day="None"):
       ) + ":" + formatted_minutes + ' ' + time_of_day + ', ' + next_day + " (same day)"
     else:
       new_time = str(start_hour) + ":" + formatted_minutes + ' ' + time_of_day
+    print(new_time)
     return new_time
-
   if (duration_list[0] == '24' and duration_list[1] == '00'):
     formatted_minutes = str(minutes).zfill(2)
     if (day != "None"):
@@ -108,11 +116,21 @@ def add_time(start, duration, day="None"):
       new_time = str(
         start_hour
       ) + ":" + formatted_minutes + ' ' + time_of_day + " (next day)"
+    print(new_time)
     return new_time
 
   if (hour >= 13 and time_of_day == "PM"):
     if (hour > 23):
       get_number_of_days = round(hour / 24)
+
+
+      if (day != "None"):
+        print("day key= ", day_key)
+        next_day = int(get_number_of_days) + day_key
+        if (next_day <= 7):
+          next_day = days_of_week[next_day]
+        else:
+          next_day = days_of_week[next_day - get_number_of_days - 1]
 
       if (get_number_of_days > 1):
         days_elapsed = " (" + str(get_number_of_days) + " days later)"
@@ -132,18 +150,17 @@ def add_time(start, duration, day="None"):
         new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day + ", " + next_day + days_elapsed
       else:
         new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day + days_elapsed
-
     # Converts AM to PM correctly
     else:
       hour = hour - 12
       formatted_hour = str(hour)
       time_of_day = "PM"
       if (day != "None"):
-        new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day + ", " + next_day
+        new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day + ", " + days_of_week[next_day]
       else:
         new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day
 
-  # Time period change at 12 PM
+  # New time is ???
   elif (hour <= 12 and time_of_day == "AM"):
     formatted_hour = str(hour)
     time_of_day = "PM"
@@ -155,10 +172,11 @@ def add_time(start, duration, day="None"):
     time_of_day = "PM"
     new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day
 
+  # elif (hour == 12 and time_of_day == "PM"):
   # New time is 12PM - 12:59PM
   else:
     formatted_hour = str(hour)
     new_time = formatted_hour + ":" + formatted_minutes + " " + time_of_day
 
-
+  print(new_time)
   return new_time
